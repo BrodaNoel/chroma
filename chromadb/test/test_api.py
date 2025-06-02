@@ -20,6 +20,7 @@ from chromadb.utils.embedding_functions import (
 )
 from typing import Any
 from chromadb.errors import InvalidArgumentError
+from chromadb.test.conftest import ClientFactories
 
 persist_dir = tempfile.mkdtemp()
 
@@ -28,7 +29,7 @@ persist_dir = tempfile.mkdtemp()
 def local_persist_api():
     client = chromadb.Client(
         Settings(
-            chroma_api_impl="chromadb.api.segment.SegmentAPI",
+            chroma_api_impl="chromadb.api.rust.RustBindingsAPI",
             chroma_sysdb_impl="chromadb.db.impl.sqlite.SqliteDB",
             chroma_producer_impl="chromadb.db.impl.sqlite.SqliteDB",
             chroma_consumer_impl="chromadb.db.impl.sqlite.SqliteDB",
@@ -49,7 +50,7 @@ def local_persist_api():
 def local_persist_api_cache_bust():
     client = chromadb.Client(
         Settings(
-            chroma_api_impl="chromadb.api.segment.SegmentAPI",
+            chroma_api_impl="chromadb.api.rust.RustBindingsAPI",
             chroma_sysdb_impl="chromadb.db.impl.sqlite.SqliteDB",
             chroma_producer_impl="chromadb.db.impl.sqlite.SqliteDB",
             chroma_consumer_impl="chromadb.db.impl.sqlite.SqliteDB",
@@ -76,7 +77,13 @@ def vector_approx_equal(a, b, tolerance: float = 1e-6) -> bool:
 
 
 @pytest.mark.parametrize("api_fixture", [local_persist_api])
-def test_persist_index_loading(api_fixture, request):
+def test_persist_index_loading(client_factories: ClientFactories, api_fixture, request):
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
     client = request.getfixturevalue("local_persist_api")
     client.reset()
     collection = client.create_collection("test")
@@ -101,7 +108,15 @@ def test_persist_index_loading(api_fixture, request):
 
 
 @pytest.mark.parametrize("api_fixture", [local_persist_api])
-def test_persist_index_loading_embedding_function(api_fixture, request):
+def test_persist_index_loading_embedding_function(
+    client_factories: ClientFactories, api_fixture, request
+):
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
     class TestEF(EmbeddingFunction[Document]):
         def __call__(self, input):
             return [np.array([1, 2, 3]) for _ in range(len(input))]
@@ -142,7 +157,15 @@ def test_persist_index_loading_embedding_function(api_fixture, request):
 
 
 @pytest.mark.parametrize("api_fixture", [local_persist_api])
-def test_persist_index_get_or_create_embedding_function(api_fixture, request):
+def test_persist_index_get_or_create_embedding_function(
+    client_factories: ClientFactories, api_fixture, request
+):
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
     class TestEF(EmbeddingFunction[Document]):
         def __call__(self, input):
             return [np.array([1, 2, 3]) for _ in range(len(input))]
@@ -189,7 +212,13 @@ def test_persist_index_get_or_create_embedding_function(api_fixture, request):
 
 
 @pytest.mark.parametrize("api_fixture", [local_persist_api])
-def test_persist(api_fixture, request):
+def test_persist(client_factories: ClientFactories, api_fixture, request):
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
     client = request.getfixturevalue(api_fixture.__name__)
 
     client.reset()

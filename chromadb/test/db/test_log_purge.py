@@ -1,10 +1,16 @@
-from chromadb.api.client import Client
-from chromadb.config import System
 from chromadb.test.property import invariants
+from chromadb.test.conftest import ClientFactories
+import pytest
 
 
-def test_log_purge(sqlite_persistent: System) -> None:
-    client = Client.from_system(sqlite_persistent)
+def test_log_purge(client_factories: ClientFactories) -> None:
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
+    client = client_factories.create_client()
 
     first_collection = client.create_collection(
         "first_collection", metadata={"hnsw:sync_threshold": 10, "hnsw:batch_size": 10}
@@ -26,8 +32,15 @@ def test_log_purge(sqlite_persistent: System) -> None:
     invariants.log_size_below_max(client._system, collections, True)
 
 
-def test_log_purge_with_multiple_collections(sqlite_persistent: System) -> None:
-    client = Client.from_system(sqlite_persistent)
+def test_log_purge_with_multiple_collections(client_factories: ClientFactories) -> None:
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
+
+    client = client_factories.create_client()
+    client.reset()
 
     first_collection = client.create_collection(
         "first_collection", metadata={"hnsw:sync_threshold": 10, "hnsw:batch_size": 10}

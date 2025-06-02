@@ -1,6 +1,4 @@
 import pytest
-from chromadb.api.client import AdminClient, Client
-from chromadb.config import System
 from chromadb.db.impl.sqlite import SqliteDB
 from chromadb.errors import NotFoundError
 from chromadb.test.conftest import ClientFactories
@@ -52,13 +50,18 @@ def test_does_not_affect_other_databases(client_factories: ClientFactories) -> N
         first_client.get_collection("test")
 
 
-def test_collection_was_removed(sqlite_persistent: System) -> None:
-    sqlite = sqlite_persistent.instance(SqliteDB)
+def test_collection_was_removed(client_factories: ClientFactories) -> None:
+    if (
+        client_factories._system.settings.chroma_api_impl
+        != "chromadb.api.rust.RustBindingsAPI"
+    ):
+        pytest.skip("This test is only valid for Rust bindings")
 
-    admin_client = AdminClient.from_system(sqlite_persistent)
+    sqlite = client_factories._system.instance(SqliteDB)
+    admin_client = client_factories.create_admin_client_from_system()
     admin_client.create_database("test_delete_database")
 
-    client = Client.from_system(sqlite_persistent, database="test_delete_database")
+    client = client_factories.create_client(database="test_delete_database")
     client.create_collection("foo")
 
     admin_client.delete_database("test_delete_database")
