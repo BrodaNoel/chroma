@@ -53,7 +53,93 @@ jobs:
           command: build
       - name: Install built wheel
         shell: bash
+<<<<<<< HEAD
         run: pip install --no-index --find-links target/wheels/ chromadb
+||||||| parent of 554cb7c6c (Update .github/workflows/_python-tests.yml)
+        env:
+          CHROMA_THIN_CLIENT: "1"
+          ENV_FILE: ${{ contains(inputs.platform, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+          PROPERTY_TESTING_PRESET: ${{ inputs.property_testing_preset }}
+
+  test-cluster-rust-frontend:
+    if: ${{ contains(inputs.platform, 'ubuntu') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ${{fromJson(inputs.python_versions)}}
+        platform: ["blacksmith-8vcpu-ubuntu-2204"]
+        test-globs: ["chromadb/test/api",
+                    "chromadb/test/api/test_collection.py",
+                    "chromadb/test/api/test_limit_offset.py",
+                    "chromadb/test/property/test_collections.py",
+                    "chromadb/test/property/test_add.py",
+                    "chromadb/test/property/test_filtering.py",
+                    "chromadb/test/property/test_fork.py",
+                    "chromadb/test/property/test_embeddings.py",
+                    "chromadb/test/property/test_collections_with_database_tenant.py",
+                    "chromadb/test/property/test_collections_with_database_tenant_overwrite.py",
+                    "chromadb/test/distributed/test_sanity.py",
+                    "chromadb/test/distributed/test_log_failover.py"]
+    runs-on: ["blacksmith-16vcpu-ubuntu-2204"]
+    # OIDC token auth for AWS
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/python
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Set up Docker
+        uses: ./.github/actions/docker
+        with:
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Start Tilt services
+        uses: ./.github/actions/tilt
+=======
+        env:
+          CHROMA_THIN_CLIENT: "1"
+          ENV_FILE: ${{ contains(inputs.platform, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+          PROPERTY_TESTING_PRESET: ${{ inputs.property_testing_preset }}
+
+  test-cluster-rust-frontend:
+    if: ${{ contains(inputs.platform, 'ubuntu') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ${{fromJson(inputs.python_versions)}}
+        platform: ["blacksmith-8vcpu-ubuntu-2204"]
+        test-globs: ["chromadb/test/api",
+                    "chromadb/test/api/test_collection.py",
+                    "chromadb/test/api/test_limit_offset.py",
+                    "chromadb/test/property/test_collections.py",
+                    "chromadb/test/property/test_add.py",
+                    "chromadb/test/property/test_filtering.py",
+                    "chromadb/test/property/test_fork.py",
+                    "chromadb/test/property/test_embeddings.py",
+                    "chromadb/test/property/test_collections_with_database_tenant.py",
+                    "chromadb/test/property/test_collections_with_database_tenant_overwrite.py",
+                    "chromadb/test/distributed/test_sanity.py",
+                    "chromadb/test/distributed/test_log_failover.py"]
+    runs-on: blacksmith-8vcpu-ubuntu-2204
+    # OIDC token auth for AWS
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/python
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Set up Docker
+        uses: ./.github/actions/docker
+        with:
+          dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Start Tilt services
+        uses: ./.github/actions/tilt
+>>>>>>> 554cb7c6c (Update .github/workflows/_python-tests.yml)
       - name: Test
         run: python -m pytest ${{ matrix.test-glob }} ${{ matrix.parallelized && '-n auto --dist worksteal' || '' }} -v --color=yes --durations 10
         shell: bash
