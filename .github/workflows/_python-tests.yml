@@ -90,7 +90,13 @@ jobs:
       run: bin/rust-integration-test.sh ${{ matrix.test-glob }}
       shell: bash
       env:
+<<<<<<< HEAD
         ENV_FILE: ${{ contains(inputs.runner, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+||||||| parent of e2e3513e0 (Infer ENV_FILE from platform input)
+        ENV_FILE: ${{ inputs.env-file }}
+=======
+        ENV_FILE: ${{ contains(inputs.platform, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+>>>>>>> e2e3513e0 (Infer ENV_FILE from platform input)
         PROPERTY_TESTING_PRESET: ${{ inputs.property_testing_preset }}
 
   test-rust-thin-client:
@@ -120,7 +126,13 @@ jobs:
         shell: bash
         env:
           CHROMA_THIN_CLIENT: "1"
+<<<<<<< HEAD
           ENV_FILE: ${{ contains(inputs.runner, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+||||||| parent of e2e3513e0 (Infer ENV_FILE from platform input)
+          ENV_FILE: ${{ inputs.env-file }}
+=======
+          ENV_FILE: ${{ contains(inputs.platform, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+>>>>>>> e2e3513e0 (Infer ENV_FILE from platform input)
           PROPERTY_TESTING_PRESET: ${{ inputs.property_testing_preset }}
 
   test-cluster-rust-frontend:
@@ -251,7 +263,13 @@ jobs:
       run: python -m pytest "chromadb/test/test_cli.py"
       shell: bash
       env:
+<<<<<<< HEAD
         ENV_FILE: ${{ contains(inputs.runner, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+||||||| parent of e2e3513e0 (Infer ENV_FILE from platform input)
+        ENV_FILE: ${{ inputs.env-file }}
+=======
+        ENV_FILE: ${{ contains(inputs.platform, 'ubuntu') && 'compose-env.linux' || 'compose-env.windows' }}
+>>>>>>> e2e3513e0 (Infer ENV_FILE from platform input)
         PROPERTY_TESTING_PRESET: ${{ inputs.property_testing_preset }}
 
   test-windows-smoke:
