@@ -286,4 +286,3 @@ jobs:
         env:
           CHROMA_RUST_BINDINGS_TEST_ONLY: "1"
           RUST_BACKTRACE: 1
-          RUN_NUMBER: ${{ matrix.run_number }}
