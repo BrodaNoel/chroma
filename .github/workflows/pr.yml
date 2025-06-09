@@ -275,16 +275,19 @@ jobs:
         jobs: ${{ toJSON(needs) }}
         allowed-skips: python-tests,python-vulnerability-scan,javascript-client-tests,rust-tests,go-tests,check-helm-version-bump,delete-helm-comment
 
-  # This is just for testing. This will be moved to the workflows that run on main for tests and deploys
   notify-slack-on-failure:
     name: Notify Slack on Test Failure
-    if: always()
-    # needs:
-    #   - python-tests
-    #   - python-vulnerability-scan
-    #   - javascript-client-tests
-    #   - rust-tests
-    #   - go-tests
+    if: github.ref == 'refs/heads/main' && failure()
+    needs:
+    - python-tests
+    - python-vulnerability-scan
+    - javascript-client-tests
+    - rust-tests
+    - go-tests
+    - check-title
+    - lint
+    - check-helm-version-bump
+    - delete-helm-comment
     runs-on: blacksmith-2vcpu-ubuntu-2204
     steps:
       - name: Notify Slack
